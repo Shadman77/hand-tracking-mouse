@@ -19,9 +19,30 @@ with mp_hands.Hands(
         if not success:
             print("Ignoring empty camera frame...")
             continue
+        
+        # Convert the BGR image to RGB.
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # TODO: check frame for hands
-        # TODO: draw detected hand landmarks on frame
+        # Process the frame and detect hands
+        results = hands.process(frame_rgb)
+
+        # Print the number of hands detected
+        if results.multi_hand_landmarks is None:
+            print("No hands detected")
+        else:
+            print(f"Number of hands detected: {len(results.multi_hand_landmarks)}")
+        
+        
+        # Draw the hand annotations on the image
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(
+                    image=frame,
+                    landmark_list=hand_landmarks,
+                    connections=mp_hands.HAND_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+                    connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+                )
 
         cv2.imshow("Hand Tracking", cv2.flip(frame, 1))
         if cv2.waitKey(1) & 0xFF == ord("q"):
